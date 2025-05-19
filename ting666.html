@@ -24,9 +24,9 @@
   </div>
 
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbz6G-HE8BVR_knRqugYlr14dVMlrmIgiBVOn2m_zaWRBOuLqNggXLB6oIsWrqsLl0zR1g/exec";
+    const configUrl = "https://script.google.com/macros/s/AKfycbwrX1HGDbcigadT8m4ymHDHC8Fr5o8LbD9xGmZcowzmHvtLb8oW9HJ0FIDtB6S_h78iVA/exec";
     let mqttTopic = "";
-
+  
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
@@ -39,14 +39,27 @@
         checkPassword();
       }
     }
-
+  
     function checkPassword() {
       const password = document.getElementById("passwordInput").value;
+      const errorMsg = document.getElementById("errorMsg");
+      errorMsg.innerText = "";
+  
       if (!password) {
-        document.getElementById("errorMsg").innerText = "請輸入密碼";
+        errorMsg.innerText = "請輸入密碼";
         return;
       }
-      fetch(configUrl + "?password=" + encodeURIComponent(password))
+  
+      // 1️⃣ 先取得訪客 IP
+      fetch("https://api.ipify.org?format=json")
+        .then(res => res.json())
+        .then(ipData => {
+          const userIp = ipData.ip;
+  
+          // 2️⃣ 把密碼與 IP 一起送出
+          const url = configUrl + "?password=" + encodeURIComponent(password) + "&ip=" + encodeURIComponent(userIp);
+          return fetch(url);
+        })
         .then(res => res.json())
         .then(data => {
           if (data.success) {
@@ -54,24 +67,27 @@
             document.getElementById("loginBox").style.display = "none";
             document.getElementById("streamBox").style.display = "block";
             startMQTT();
+  
+            console.log("訪客 IP：", data.visitorIp);
+            console.log("今日造訪次數：", data.todayVisits);
           } else {
-            document.getElementById("errorMsg").innerText = data.message || "驗證失敗";
+            errorMsg.innerText = data.message || "驗證失敗";
           }
         })
         .catch(err => {
-          document.getElementById("errorMsg").innerText = "連線錯誤，請稍後再試";
+          errorMsg.innerText = "連線錯誤，請稍後再試";
           console.error(err);
         });
     }
-
+  
     function startMQTT() {
       const client = mqtt.connect("wss://broker.mqttgo.io:8084/mqtt");
-
+  
       client.on("connect", () => {
         console.log("MQTT Connected");
         client.subscribe(mqttTopic);
       });
-
+  
       let oldUrl = null;
       client.on("message", (topic, payload) => {
         const blob = new Blob([payload], { type: 'image/jpeg' });
