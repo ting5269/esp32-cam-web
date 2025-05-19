@@ -12,7 +12,7 @@
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像1.3</h2>
+    <h2>請輸入密碼以觀看即時影像2.0</h2>
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
@@ -20,6 +20,7 @@
 
   <div id="streamBox">
     <h2>ESP32 即時影像</h2>
+    <p id="visitInfo" style="margin-bottom: 10px; color: #555;"></p>
     <img id="cameraImage" src="" style="width: 100%; max-width: 600px; border: 1px solid #ccc; border-radius: 8px;">
   </div>
 
@@ -67,10 +68,12 @@
             document.getElementById("loginBox").style.display = "none";
             document.getElementById("streamBox").style.display = "block";
             startMQTT();
-  
-            console.log("訪客 IP：", data.visitorIp);
-            console.log("今日造訪次數：", data.todayVisits);
-          } else {
+          
+            // 顯示訪客 IP 和今日造訪次數
+            document.getElementById("visitInfo").innerText =
+              `您的 IP：${data.visitorIp}，今日造訪次數：${data.todayVisits}`;
+          }
+           else {
             errorMsg.innerText = data.message || "驗證失敗";
           }
         })
