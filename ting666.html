@@ -12,7 +12,7 @@
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像</h2>
+    <h2>請輸入密碼以觀看即時影像2</h2>
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
@@ -26,6 +26,19 @@
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbxQBAp7YIy1p_v3CzJ8AdiQ-lBcaovrDFiWa0GWHpNjMaa5hN8qpxwy8X9fGjPY902owQ/exec";
     let mqttTopic = "";
+
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+  
+    window.onload = () => {
+      const pw = getQueryParam("pw");
+      if (pw) {
+        document.getElementById("passwordInput").value = pw;
+        checkPassword();
+      }
+    }
 
     function checkPassword() {
       const password = document.getElementById("passwordInput").value;
