@@ -2,28 +2,18 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ESP32-CAM 即時影像</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-    }
-    #loginBox {
-      margin-top: 100px;
-      text-align: center;
-    }
-    #streamBox {
-      display: none;
-      text-align: center;
-    }
+    body { font-family: sans-serif; }
+    #loginBox { margin-top: 100px; text-align: center; }
+    #streamBox { display: none; text-align: center; }
   </style>
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像1</h2>
-    <input type="text" id="passwordInput" placeholder="輸入密碼"
-       inputmode="text" autocomplete="off" lang="zh-Hant">
+    <h2>請輸入密碼以觀看即時影像</h2>
+    <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
   </div>
@@ -34,32 +24,31 @@
   </div>
 
   <script>
-    let correctPassword = "";
+    const configUrl = "https://script.google.com/macros/s/AKfycbxQBAp7YIy1p_v3CzJ8AdiQ-lBcaovrDFiWa0GWHpNjMaa5hN8qpxwy8X9fGjPY902owQ/exec";
     let mqttTopic = "";
 
-    // 換成你實際部署的 Google Apps Script Web App 網址
-    const configUrl = "https://script.google.com/macros/s/AKfycbwzRFmAIA4UHuuFMcAgKOsbid4S0F6XeyWUh71xtWPIuRbq0UM5UooG_Q575mL0podz7A/exec";
-
-    fetch(configUrl)
-      .then(response => response.json())
-      .then(config => {
-        correctPassword = config.correctPassword;
-        mqttTopic = config.mqttTopic;
-      })
-      .catch(error => {
-        document.getElementById("errorMsg").innerText = "載入設定失敗，請稍後再試。";
-        console.error("錯誤：", error);
-      });
-
     function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === correctPassword) {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("streamBox").style.display = "block";
-        startMQTT();
-      } else {
-        document.getElementById("errorMsg").innerText = "密碼錯誤，請再試一次。";
+      const password = document.getElementById("passwordInput").value;
+      if (!password) {
+        document.getElementById("errorMsg").innerText = "請輸入密碼";
+        return;
       }
+      fetch(configUrl + "?password=" + encodeURIComponent(password))
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            mqttTopic = data.mqttTopic;
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("streamBox").style.display = "block";
+            startMQTT();
+          } else {
+            document.getElementById("errorMsg").innerText = data.message || "驗證失敗";
+          }
+        })
+        .catch(err => {
+          document.getElementById("errorMsg").innerText = "連線錯誤，請稍後再試";
+          console.error(err);
+        });
     }
 
     function startMQTT() {
@@ -70,12 +59,12 @@
         client.subscribe(mqttTopic);
       });
 
-      let chunks = [];
+      let oldUrl = null;
       client.on("message", (topic, payload) => {
-        chunks.push(payload);
-        const blob = new Blob(chunks, { type: 'image/jpeg' });
-        document.getElementById("cameraImage").src = URL.createObjectURL(blob);
-        chunks = [];
+        const blob = new Blob([payload], { type: 'image/jpeg' });
+        if (oldUrl) URL.revokeObjectURL(oldUrl);
+        oldUrl = URL.createObjectURL(blob);
+        document.getElementById("cameraImage").src = oldUrl;
       });
     }
   </script>
