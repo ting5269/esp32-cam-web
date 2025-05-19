@@ -1,49 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>ESP32-CAM 即時影像 with Visitor ID</title>
+  <meta charset="UTF-8">
+  <title>ESP32-CAM 即時影像</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     body { font-family: sans-serif; }
     #loginBox { margin-top: 100px; text-align: center; }
     #streamBox { display: none; text-align: center; }
-    #errorMsg { color: red; }
   </style>
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像3.0</h2>
-    <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant" />
+    <h2>請輸入密碼以觀看即時影像2.3</h2>
+    <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
-    <p id="errorMsg"></p>
+    <p id="errorMsg" style="color: red;"></p>
   </div>
 
   <div id="streamBox">
     <h2>ESP32 即時影像</h2>
-    <img
-      id="cameraImage"
-      src=""
-      style="width: 100%; max-width: 600px; border: 1px solid #ccc; border-radius: 8px;"
-    />
+    <img id="cameraImage" src="" style="width: 100%; max-width: 600px; border: 1px solid #ccc; border-radius: 8px;">
   </div>
 
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbz2TMVwIIOXn_FdvfSqH_Z5d0Pta3y0aoDNWj1c8nd0grepnswx89wwnVqw-ZpIvjlXXw/exec"; // 改成你的 GAS URL
+    const configUrl = "https://script.google.com/macros/s/AKfycbwkGwuEmTrXVY2ag0LZLEQo9rO9XiSAI9MWph6MWbhIHlrlv8CpGyQm-FHkpwCXcV-zwQ/exec";
     let mqttTopic = "";
 
-    // 取得或建立訪客唯一 ID (UUID)
-    function getOrCreateVisitorId() {
-      let visitorId = localStorage.getItem("visitorId");
-      if (!visitorId) {
-        visitorId = crypto.randomUUID(); // 產生 UUID
-        localStorage.setItem("visitorId", visitorId);
-      }
-      return visitorId;
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
     }
 
-    async function checkPassword() {
-      const password = document.getElementById("passwordInput").value.trim();
+    window.onload = () => {
+      fetchVisitData(); // ✅ 頁面載入時就查詢造訪資訊
+
+      const pw = getQueryParam("pw");
+      if (pw) {
+        document.getElementById("passwordInput").value = pw;
+        checkPassword();
+      }
+    }
+
+    function fetchVisitData() {
+      fetch(configUrl + "?action=visits")
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("visitCount").innerText = data.todayVisits;
+          const ipList = document.getElementById("ipList");
+          ipList.innerHTML = "";
+          if (Array.isArray(data.visitorIps)) {
+            data.visitorIps.forEach(ip => {
+              const li = document.createElement("li");
+              li.textContent = ip;
+              ipList.appendChild(li);
+            });
+          }
+        })
+        .catch(err => {
+          document.getElementById("visitCount").innerText = "錯誤";
+          console.error("取得造訪資料失敗", err);
+        });
+    }
+
+    function toggleIpList() {
+      const list = document.getElementById("ipList");
+      list.style.display = (list.style.display === "none") ? "block" : "none";
+    }
+
+    function checkPassword() {
+      const password = document.getElementById("passwordInput").value;
       const errorMsg = document.getElementById("errorMsg");
       errorMsg.innerText = "";
 
@@ -52,27 +78,28 @@
         return;
       }
 
-      const visitorId = getOrCreateVisitorId();
-
-      // 將密碼和 visitorId 傳給 GAS 後端
-      try {
-        const res = await fetch(
-          `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}`
-        );
-        const data = await res.json();
-
-        if (data.success) {
-          mqttTopic = data.mqttTopic;
-          document.getElementById("loginBox").style.display = "none";
-          document.getElementById("streamBox").style.display = "block";
-          startMQTT();
-        } else {
-          errorMsg.innerText = data.message || "驗證失敗";
-        }
-      } catch (err) {
-        errorMsg.innerText = "連線錯誤，請稍後再試";
-        console.error(err);
-      }
+      fetch("https://api.ipify.org?format=json")
+        .then(res => res.json())
+        .then(ipData => {
+          const userIp = ipData.ip;
+          const url = configUrl + "?password=" + encodeURIComponent(password) + "&ip=" + encodeURIComponent(userIp);
+          return fetch(url);
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            mqttTopic = data.mqttTopic;
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("streamBox").style.display = "block";
+            startMQTT();
+          } else {
+            errorMsg.innerText = data.message || "驗證失敗";
+          }
+        })
+        .catch(err => {
+          errorMsg.innerText = "連線錯誤，請稍後再試";
+          console.error(err);
+        });
     }
 
     function startMQTT() {
@@ -85,7 +112,7 @@
 
       let oldUrl = null;
       client.on("message", (topic, payload) => {
-        const blob = new Blob([payload], { type: "image/jpeg" });
+        const blob = new Blob([payload], { type: 'image/jpeg' });
         if (oldUrl) URL.revokeObjectURL(oldUrl);
         oldUrl = URL.createObjectURL(blob);
         document.getElementById("cameraImage").src = oldUrl;
