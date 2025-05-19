@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32-CAM 即時影像</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    #loginBox {
+      margin-top: 100px;
+      text-align: center;
+    }
+    #streamBox {
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="loginBox">
+    <h2>請輸入密碼以觀看即時影像</h2>
+    <input type="text" id="passwordInput" placeholder="輸入密碼">
+    <button onclick="checkPassword()">登入</button>
+    <p id="errorMsg" style="color: red;"></p>
+  </div>
+
+  <div id="streamBox">
+    <h2>ESP32 即時影像</h2>
+    <img id="cameraImage" src="" style="width: 320px; height: 240px; border: 1px solid #ccc;">
+  </div>
+
+  <script>
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      fetch(`/check-password?input=${input}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("streamBox").style.display = "block";
+            startMQTT(data.topic);
+          } else {
+            document.getElementById("errorMsg").innerText = "密碼錯誤，請再試一次。";
+          }
+        });
+    }
+
+    function startMQTT(topic) {
+      const client = mqtt.connect("wss://broker.mqttgo.io:8084/mqtt");
+      client.on("connect", () => {
+        client.subscribe(topic);
+      });
+
+      let chunks = [];
+      client.on("message", (topic, payload) => {
+        chunks.push(payload);
+        let blob = new Blob(chunks, { type: 'image/jpeg' });
+        document.getElementById("cameraImage").src = URL.createObjectURL(blob);
+        chunks = [];
+      });
+    }
+  </script>
+</body>
+</html>
