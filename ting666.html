@@ -5,43 +5,14 @@
   <title>ESP32-CAM 即時影像</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    #loginBox {
-      margin-top: 100px;
-    }
-    #streamBox {
-      display: none;
-    }
-    #cameraImage {
-      width: 100%;
-      max-width: 640px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    #visitorCounter {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #fff;
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      cursor: pointer;
-      z-index: 999;
-    }
+    body { font-family: sans-serif; }
+    #loginBox { margin-top: 100px; text-align: center; }
+    #streamBox { display: none; text-align: center; }
   </style>
 </head>
 <body>
-  <div id="visitorCounter">載入中...</div>
-
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像2.2</h2>
+    <h2>請輸入密碼以觀看即時影像1.3</h2>
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
@@ -49,30 +20,25 @@
 
   <div id="streamBox">
     <h2>ESP32 即時影像</h2>
-    <img id="cameraImage" src="">
+    <img id="cameraImage" src="" style="width: 100%; max-width: 550px; border: 1px solid #ccc; border-radius: 8px;">
   </div>
 
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbw8Z3nPdg7cZU7vD9177rjLgHBLj4hDPeI6ugD8xuabtnMpxN2SNyAHMzKqVI6dS97hCg/exec";
-    const visitorUrl = "https://script.google.com/macros/s/AKfycbw8Z3nPdg7cZU7vD9177rjLgHBLj4hDPeI6ugD8xuabtnMpxN2SNyAHMzKqVI6dS97hCg/exec";
-
+    const configUrl = "https://script.google.com/macros/s/AKfycbz6G-HE8BVR_knRqugYlr14dVMlrmIgiBVOn2m_zaWRBOuLqNggXLB6oIsWrqsLl0zR1g/exec";
     let mqttTopic = "";
 
-    // 自動帶入網址參數
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
-
+  
     window.onload = () => {
-      updateVisitorInfo();
-
       const pw = getQueryParam("pw");
       if (pw) {
         document.getElementById("passwordInput").value = pw;
         checkPassword();
       }
-    };
+    }
 
     function checkPassword() {
       const password = document.getElementById("passwordInput").value;
@@ -80,7 +46,6 @@
         document.getElementById("errorMsg").innerText = "請輸入密碼";
         return;
       }
-
       fetch(configUrl + "?password=" + encodeURIComponent(password))
         .then(res => res.json())
         .then(data => {
@@ -114,30 +79,6 @@
         oldUrl = URL.createObjectURL(blob);
         document.getElementById("cameraImage").src = oldUrl;
       });
-    }
-
-    function updateVisitorInfo() {
-      fetch("https://api.ipify.org?format=json")
-        .then(res => res.json())
-        .then(ipData => {
-          return fetch(visitorUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `ip=${ipData.ip}`
-          });
-        })
-        .then(res => res.json())
-        .then(data => {
-          const counter = document.getElementById("visitorCounter");
-          counter.innerText = `今日造訪人數：${data.count}`;
-          counter.onclick = () => {
-            alert("訪客 IPs:\n" + data.visitors.join("\n"));
-          };
-        })
-        .catch(err => {
-          console.error("訪客統計錯誤", err);
-          document.getElementById("visitorCounter").innerText = "載入失敗";
-        });
     }
   </script>
 </body>
