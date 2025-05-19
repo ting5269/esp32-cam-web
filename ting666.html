@@ -13,15 +13,11 @@
 <body>
   <div id="loginBox">
     <h2>請輸入密碼以觀看即時影像 2.2</h2>
-
-    <!-- ✅ 造訪次數與 IP 清單 -->
-    <div id="visitSummary" style="margin-bottom: 20px;">
-      <p>
-        今日造訪次數：<span id="visitCount">載入中...</span>
-        <button onclick="toggleIpList()">顯示/隱藏 IP 清單</button>
-      </p>
-      <ul id="ipList" style="display: none; padding: 0; list-style: none; color: #555;"></ul>
-    </div>
+  
+    <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
+    <button onclick="checkPassword()">登入</button>
+    <p id="errorMsg" style="color: red;"></p>
+  </div>
 
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
