@@ -12,7 +12,7 @@
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像3.2.1</h2>
+    <h2>請輸入密碼以觀看即時影像3.2.2</h2>
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
@@ -23,7 +23,7 @@
     <img id="cameraImage" src="" style="width: 100%; max-width: 700px; border: 1px solid #ccc; border-radius: 8px;">
   </div>
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbwo6TwXGN_cb5L68Z56vuZBGczR8Ml6_bVy54zKzQV24lfaSYHy_yC0tebDNsA_KE-6AQ/exec";
+    const configUrl = "https://script.google.com/macros/s/AKfycbyc-ZYeZaFPmHOBDONOOY5k_vsmcXDFM-FFkIj4bqnNHA8whxf5ql-fWQAgBZud9LG9nQ/exec";
     let mqttTopic = "";
   
     function getQueryParam(name) {
@@ -48,7 +48,8 @@
       }
     }
   
-    async function checkPassword() {
+    // ✅ 更新版：包含 IP、城市、國家
+    function checkPassword() {
       const password = document.getElementById("passwordInput").value;
       const errorMsg = document.getElementById("errorMsg");
       errorMsg.innerText = "";
@@ -60,19 +61,18 @@
   
       const visitorId = getVisitorId();
   
-      // ✅ 取得使用者 IP
-      let ip = "unknown";
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const json = await res.json();
-        ip = json.ip || "unknown";
-      } catch (e) {
-        console.warn("取得 IP 失敗", e);
-      }
+      // 從 ipapi.co 拿位置資訊
+      fetch("https://ipapi.co/json/")
+        .then(res => res.json())
+        .then(ipInfo => {
+          const ip = ipInfo.ip || "unknown";
+          const city = ipInfo.city || "unknown";
+          const country = ipInfo.country_name || "unknown";
   
-      const url = `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}&ip=${encodeURIComponent(ip)}`;
+          const url = `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}&ip=${encodeURIComponent(ip)}&city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}`;
   
-      fetch(url)
+          return fetch(url);
+        })
         .then(res => res.json())
         .then(data => {
           if (data.success) {
