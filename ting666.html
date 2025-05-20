@@ -12,7 +12,7 @@
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像2.3.3</h2>
+    <h2>請輸入密碼以觀看即時影像3.0</h2>
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
@@ -26,65 +26,44 @@
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbwkGwuEmTrXVY2ag0LZLEQo9rO9XiSAI9MWph6MWbhIHlrlv8CpGyQm-FHkpwCXcV-zwQ/exec";
     let mqttTopic = "";
-
+  
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
-
+  
+    // ✅ 建立並儲存唯一訪客 ID（UUID）
+    function getVisitorId() {
+      let id = localStorage.getItem("visitorId");
+      if (!id) {
+        id = crypto.randomUUID(); // 需要支援較新版瀏覽器
+        localStorage.setItem("visitorId", id);
+      }
+      return id;
+    }
+  
     window.onload = () => {
-      fetchVisitData(); // ✅ 頁面載入時就查詢造訪資訊
-
       const pw = getQueryParam("pw");
       if (pw) {
         document.getElementById("passwordInput").value = pw;
         checkPassword();
       }
     }
-
-    function fetchVisitData() {
-      fetch(configUrl + "?action=visits")
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById("visitCount").innerText = data.todayVisits;
-          const ipList = document.getElementById("ipList");
-          ipList.innerHTML = "";
-          if (Array.isArray(data.visitorIps)) {
-            data.visitorIps.forEach(ip => {
-              const li = document.createElement("li");
-              li.textContent = ip;
-              ipList.appendChild(li);
-            });
-          }
-        })
-        .catch(err => {
-          document.getElementById("visitCount").innerText = "錯誤";
-          console.error("取得造訪資料失敗", err);
-        });
-    }
-
-    function toggleIpList() {
-      const list = document.getElementById("ipList");
-      list.style.display = (list.style.display === "none") ? "block" : "none";
-    }
-
+  
     function checkPassword() {
       const password = document.getElementById("passwordInput").value;
       const errorMsg = document.getElementById("errorMsg");
       errorMsg.innerText = "";
-
+  
       if (!password) {
         errorMsg.innerText = "請輸入密碼";
         return;
       }
-
-      fetch("https://api.ipify.org?format=json")
-        .then(res => res.json())
-        .then(ipData => {
-          const userIp = ipData.ip;
-          const url = configUrl + "?password=" + encodeURIComponent(password) + "&ip=" + encodeURIComponent(userIp);
-          return fetch(url);
-        })
+  
+      const visitorId = getVisitorId(); // ✅ 使用 visitorId
+      const url = `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}`;
+  
+      fetch(url)
         .then(res => res.json())
         .then(data => {
           if (data.success) {
@@ -101,15 +80,15 @@
           console.error(err);
         });
     }
-
+  
     function startMQTT() {
       const client = mqtt.connect("wss://broker.mqttgo.io:8084/mqtt");
-
+  
       client.on("connect", () => {
         console.log("MQTT Connected");
         client.subscribe(mqttTopic);
       });
-
+  
       let oldUrl = null;
       client.on("message", (topic, payload) => {
         const blob = new Blob([payload], { type: 'image/jpeg' });
