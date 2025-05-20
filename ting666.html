@@ -22,10 +22,9 @@
       transition: opacity 0.5s ease;
     }
     /* 影像區塊隱藏效果（點擊圖片觸發） */
-    .hiddenBox {
+    .transparentImage {
       opacity: 0;
       transition: opacity 0.5s ease;
-      /* pointer-events: none; 這行刪掉或註解 */
     }
     /* 圖片樣式 */
     #streamBox img {
@@ -169,7 +168,7 @@
       
       // 將點擊事件綁定到外層 container，不受 MQTT 更新干擾
       document.getElementById("cameraImage").addEventListener("click", function () {
-        document.getElementById("streamBox").classList.toggle("hiddenBox");
+        this.classList.toggle("transparentImage");
       });
     }
   </script>
@@ -182,7 +181,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.5
+    v3.5.1
   </div>
 </body>
 </html>
