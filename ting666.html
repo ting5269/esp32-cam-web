@@ -9,13 +9,17 @@
     body { font-family: sans-serif; }
     #loginBox { margin-top: 100px; text-align: center; }
     #streamBox { display: none; text-align: center; }
+  
     /* 圖片預設樣式 */
     #streamBox img {
       width: 100%;
       max-width: 680px;
       border: 1px solid #ccc;
       border-radius: 8px;
+      transition: opacity 0.5s ease; /* 加入淡入淡出動畫 */
+      opacity: 1;
     }
+  
     /* 手機小螢幕 max-width 調整 */
     @media (max-width: 600px) {
       #streamBox img {
@@ -23,6 +27,12 @@
         height: auto;
         border-width: 2px;
       }
+    }
+  
+    /* 點擊後隱藏效果 */
+    .hiddenImage {
+      opacity: 0;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -135,6 +145,9 @@
         oldUrl = URL.createObjectURL(blob);
         document.getElementById("cameraImage").src = oldUrl;
       });
+      document.getElementById("cameraImage").addEventListener("click", function () {
+        this.classList.toggle("hiddenImage");
+      });
     }
   </script>
   <div style="
@@ -146,7 +159,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.4.6
+    v3.4.7
   </div>
 </body>
 </html>
