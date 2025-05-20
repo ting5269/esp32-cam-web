@@ -73,6 +73,8 @@
       if (pw) {
         document.getElementById("passwordInput").value = pw;
         checkPassword();
+        // 清除網址列的 ?pw=...，不會重新載入頁面
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
   
@@ -139,12 +141,12 @@
     position: fixed;
     right: 8px;
     bottom: 8px;
-    font-size: 20px;
+    font-size: 17px;
     color: #888;
     user-select: none;
     z-index: 9999;
   ">
-    v3.4.5
+    v3.4.6
   </div>
 </body>
 </html>
