@@ -12,7 +12,7 @@
 </head>
 <body>
   <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像3.1.1</h2>
+    <h2>請輸入密碼以觀看即時影像3.2</h2>
     <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
@@ -22,7 +22,6 @@
     <h2>ESP32 即時影像</h2>
     <img id="cameraImage" src="" style="width: 100%; max-width: 700px; border: 1px solid #ccc; border-radius: 8px;">
   </div>
-
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbwbGq6FWy0ZAlrfzYEHuZPbV82DSIdT_dgroWrHMuxxftTeqtq91QZu9EznmKmIGNbBwQ/exec";
     let mqttTopic = "";
@@ -32,11 +31,10 @@
       return urlParams.get(name);
     }
   
-    // ✅ 建立並儲存唯一訪客 ID（UUID）
     function getVisitorId() {
       let id = localStorage.getItem("visitorId");
       if (!id) {
-        id = crypto.randomUUID(); // 需要支援較新版瀏覽器
+        id = crypto.randomUUID();
         localStorage.setItem("visitorId", id);
       }
       return id;
@@ -50,7 +48,7 @@
       }
     }
   
-    function checkPassword() {
+    async function checkPassword() {
       const password = document.getElementById("passwordInput").value;
       const errorMsg = document.getElementById("errorMsg");
       errorMsg.innerText = "";
@@ -60,8 +58,19 @@
         return;
       }
   
-      const visitorId = getVisitorId(); // ✅ 使用 visitorId
-      const url = `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}`;
+      const visitorId = getVisitorId();
+  
+      // ✅ 取得使用者 IP
+      let ip = "unknown";
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const json = await res.json();
+        ip = json.ip || "unknown";
+      } catch (e) {
+        console.warn("取得 IP 失敗", e);
+      }
+  
+      const url = `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}&ip=${encodeURIComponent(ip)}`;
   
       fetch(url)
         .then(res => res.json())
