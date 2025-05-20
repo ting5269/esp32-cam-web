@@ -16,9 +16,11 @@
       border-radius: 8px;
     }
     /* 手機小螢幕 max-width 調整 */
-    @media only screen and (max-width: 700px) {
-      #streamBox img {
-        max-width: 100%;
+    @media (max-width: 700px) {
+      #cameraImage {
+        max-width: 110vw; /* 滿版寬度 */
+        height: auto;     /* 自動調整高度 */
+        border-width: 2px; /* 邊框稍微粗一點(可選) */
       }
     }
   </style>
@@ -141,7 +143,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.4.2
+    v3.4.3
   </div>
 </body>
 </html>
