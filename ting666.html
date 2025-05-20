@@ -8,6 +8,19 @@
     body { font-family: sans-serif; }
     #loginBox { margin-top: 100px; text-align: center; }
     #streamBox { display: none; text-align: center; }
+    /* 圖片預設樣式 */
+    #streamBox img {
+      width: 100%;
+      max-width: 700px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    /* 手機小螢幕 max-width 調整 */
+    @media only screen and (max-width: 600px) {
+      #streamBox img {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -17,10 +30,9 @@
     <button onclick="checkPassword()">登入</button>
     <p id="errorMsg" style="color: red;"></p>
   </div>
-
   <div id="streamBox">
     <h2>ESP32 即時影像</h2>
-    <img id="cameraImage" src="" style="width: 100%; max-width: 730px; border: 1px solid #ccc; border-radius: 8px;">
+    <img id="cameraImage" src="">
   </div>
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbzN38ydepdcFpNVCrL4SDOMkgFI9fiCNtQVzQeR_H1xJCC9aej5v4RZ8_kwpoih1RW2mA/exec";
@@ -129,7 +141,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.4
+    v3.4.1
   </div>
 </body>
 </html>
