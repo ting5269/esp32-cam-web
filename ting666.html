@@ -143,10 +143,19 @@
         const blob = new Blob([payload], { type: 'image/jpeg' });
         if (oldUrl) URL.revokeObjectURL(oldUrl);
         oldUrl = URL.createObjectURL(blob);
-        document.getElementById("cameraImage").src = oldUrl;
-      });
-      document.getElementById("cameraImage").addEventListener("click", function () {
-        this.classList.toggle("hiddenImage");
+      
+        const cameraImage = document.getElementById("cameraImage");
+        cameraImage.onload = () => {
+          // 確保只綁定一次點擊事件
+          if (!cameraImage.dataset.clickBound) {
+            cameraImage.addEventListener("click", function () {
+              this.classList.toggle("hiddenImage");
+            });
+            cameraImage.dataset.clickBound = "true";
+          }
+        };
+      
+        cameraImage.src = oldUrl;
       });
     }
   </script>
@@ -159,7 +168,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.4.7
+    v3.4.8
   </div>
 </body>
 </html>
