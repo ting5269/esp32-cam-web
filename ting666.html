@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ESP32-CAM 即時影像</title>
-  <div id="cameraWrapper">
-    <img id="cameraImage" src="">
-    <img id="whiteOverlay" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Yz9wAIAAAAASUVORK5CYII=">
-  </div>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     body {
@@ -25,13 +21,6 @@
       text-align: center;
       transition: opacity 0.5s ease;
     }
-
-    /* 包裹攝影機影像與遮罩的容器 */
-    #cameraWrapper {
-      position: relative;
-      display: inline-block;
-    }
-
     #cameraImage {
       width: 100%;
       max-width: 680px;
@@ -41,26 +30,8 @@
       cursor: pointer;
       display: block;
     }
-
-    #whiteOverlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      background-color: white;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none; /* 不阻擋滑鼠事件 */
-    }
-
-    #whiteOverlay.show {
-      opacity: 1;
-    }
-
     /* 手機小螢幕調整 */
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       #cameraImage {
         max-width: 100vw;
         height: auto;
@@ -189,11 +160,6 @@
         oldUrl = URL.createObjectURL(blob);
         document.getElementById("cameraImage").src = oldUrl;
       });
-      
-      // 點擊圖片切換遮罩顯示
-      document.getElementById("cameraImage").addEventListener("click", function () {
-        document.getElementById("whiteOverlay").classList.toggle("show");
-      });
     }
   </script>
   <div style="
@@ -205,7 +171,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.5.1
+    v3.5.2
   </div>
 </body>
 </html>
