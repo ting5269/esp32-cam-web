@@ -31,7 +31,7 @@
     /* 圖片樣式 */
     #streamBox img {
       width: 100%;
-      max-width: 800px;
+      max-width: 680px;
       border: 1px solid #ccc;
       border-radius: 8px;
       transition: opacity 0.5s ease;
@@ -39,7 +39,7 @@
       cursor: pointer;
     }
     /* 手機小螢幕調整 */
-    @media (max-width: 1000px) {
+    @media (max-width: 600px) {
       #streamBox img {
         max-width: 98vw;
         height: auto;
@@ -105,18 +105,19 @@
     }
     /* 紅點 */
     #statusIndicator {
-      position: absolute;
-      top: 10px;
-      right: 10px;
+      position: fixed;
+      top: 12px;
+      right: 12px;
       width: 14px;
       height: 14px;
       background-color: red;
       border-radius: 50%;
       opacity: 0;
       animation: blink 1s infinite;
-      z-index: 10;
+      z-index: 9999;
       display: none;
     }
+    
     @keyframes blink {
       0%   { opacity: 1; }
       50%  { opacity: 0; }
@@ -136,11 +137,10 @@
   </div>
   <div id="streamBox">
     <h2>ESP32 即時影像</h2>
-    <div style="position: relative; display: inline-block;">
-      <img id="cameraImage" src="">
-      <div id="statusIndicator"></div> <!-- 移到這裡 -->
-    </div>
+    <img id="cameraImage" src="">
   </div>
+  <!-- ✅ 紅點閃爍指示器：加入這行 -->
+  <div id="statusIndicator"></div>
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbwq0FBdq-h0ndzpZI5GIqamZs63Q0QE70mudrOc7XnDBrua_DOEk8H4j8_xoREYl8Lv6w/exec";
     let mqttTopic = "";
@@ -292,7 +292,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.7.1
+    v3.7
   </div>
 </body>
 </html>
