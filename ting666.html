@@ -13,22 +13,26 @@
       padding: 0;
       background-color: #f9f9f9;
     }
+  
     #loginBox {
       margin-top: 100px;
       text-align: center;
     }
+  
     #streamBox {
       display: none;
       text-align: center;
       transition: opacity 0.5s ease;
       position: relative;
     }
+  
     /* 影像區塊隱藏效果（點擊圖片觸發） */
     .hiddenBox {
       opacity: 0;
       transition: opacity 0.5s ease;
-      /* pointer-events: none; 這行刪掉或註解 */
+      /* pointer-events: none; */
     }
+  
     /* 圖片樣式 */
     #streamBox img {
       width: 100%;
@@ -39,6 +43,7 @@
       opacity: 1;
       cursor: pointer;
     }
+  
     /* 手機小螢幕調整 */
     @media (max-width: 600px) {
       #streamBox img {
@@ -48,6 +53,7 @@
         margin-left: -3px;
       }
     }
+  
     /* 頁腳版本號樣式 */
     #versionInfo {
       position: fixed;
@@ -58,7 +64,8 @@
       user-select: none;
       z-index: 9999;
     }
-    /* 按鈕樣式 */
+  
+    /* 輸入與按鈕區 */
     .input-group {
       display: flex;
       justify-content: center;
@@ -66,7 +73,7 @@
       margin-top: 20px;
       flex-wrap: wrap;
     }
-    
+  
     .input-group input[type="password"] {
       padding: 12px;
       font-size: 16px;
@@ -76,13 +83,13 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       transition: border-color 0.3s, box-shadow 0.3s;
     }
-    
+  
     .input-group input[type="password"]:focus {
       border-color: #4CAF50;
       outline: none;
       box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
     }
-    
+  
     .input-group button {
       padding: 12px 24px;
       font-size: 16px;
@@ -94,30 +101,39 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       transition: background-color 0.3s, transform 0.2s;
     }
-    
+  
     .input-group button:hover {
       background-color: #45a049;
       transform: translateY(-2px);
     }
-    
+  
     .input-group button:active {
       transform: scale(0.98);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
-    /* 紅點 */
+  
+    /* 標題與紅點水平對齊 */
+    #streamBox h2 {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+  
+    /* 紅點樣式 */
     #statusIndicator {
-      position: absolute;
-      top: 10px;    /* 調整這裡距離 */
-      right: 10px;  /* 調整這裡距離 */
       width: 14px;
       height: 14px;
       background-color: red;
       border-radius: 50%;
-      opacity: 1;   /* 不要0，改用動畫控制 */
+      opacity: 1;
       animation: blink 1s infinite;
-      z-index: 10;  /* 確保比圖片高 */
-      display: none;
+      display: none; /* 預設隱藏，畫面有更新才顯示 */
+      vertical-align: middle;
     }
+  
+    /* 紅點閃爍動畫 */
     @keyframes blink {
       0%   { opacity: 1; }
       50%  { opacity: 0; }
@@ -135,11 +151,12 @@
     <p id="errorMsg" style="color: red;"></p>
     <p id="loadingMsg" style="color: green; display: none;">登入中<span id="dotAnim"></span></p>
   </div>
-  <div id="streamBox" style="position: relative;">
-    <h2>ESP32 即時影像</h2>
+  <div id="streamBox" style="text-align: center;">
+    <h2 style="display: inline-flex; align-items: center; gap: 8px;">
+      ESP32 即時影像
+      <div id="statusIndicator"></div>
+    </h2>
     <img id="cameraImage" src="">
-    <!-- 紅點放這裡 -->
-    <div id="statusIndicator"></div>
   </div>
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbwq0FBdq-h0ndzpZI5GIqamZs63Q0QE70mudrOc7XnDBrua_DOEk8H4j8_xoREYl8Lv6w/exec";
@@ -292,7 +309,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.7.2
+    v3.7.3
   </div>
 </body>
 </html>
