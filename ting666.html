@@ -57,6 +57,28 @@
       user-select: none;
       z-index: 9999;
     }
+    /* 按鈕樣式 */
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+    }
+    
+    button:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -206,7 +228,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.6.1
+    v3.6.2
   </div>
 </body>
 </html>
