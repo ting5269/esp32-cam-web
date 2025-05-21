@@ -105,9 +105,9 @@
     }
     /* 紅點 */
     #statusIndicator {
-      position: fixed;
-      top: 12px;
-      right: 12px;
+      position: absolute;  /* 絕對定位 */
+      top: 8px;            /* 調整距離上方 */
+      right: 8px;          /* 調整距離右方 */
       width: 14px;
       height: 14px;
       background-color: red;
@@ -117,7 +117,6 @@
       z-index: 9999;
       display: none;
     }
-    
     @keyframes blink {
       0%   { opacity: 1; }
       50%  { opacity: 0; }
@@ -135,12 +134,12 @@
     <p id="errorMsg" style="color: red;"></p>
     <p id="loadingMsg" style="color: green; display: none;">登入中<span id="dotAnim"></span></p>
   </div>
-  <div id="streamBox">
+  <div id="streamBox" style="position: relative;">
     <h2>ESP32 即時影像</h2>
     <img id="cameraImage" src="">
+    <!-- 紅點放這裡 -->
+    <div id="statusIndicator"></div>
   </div>
-  <!-- ✅ 紅點閃爍指示器：加入這行 -->
-  <div id="statusIndicator"></div>
   <script>
     const configUrl = "https://script.google.com/macros/s/AKfycbwq0FBdq-h0ndzpZI5GIqamZs63Q0QE70mudrOc7XnDBrua_DOEk8H4j8_xoREYl8Lv6w/exec";
     let mqttTopic = "";
@@ -292,7 +291,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.7
+    v3.7.1
   </div>
 </body>
 </html>
