@@ -58,7 +58,31 @@
       z-index: 9999;
     }
     /* 按鈕樣式 */
-    button {
+    .input-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .input-group input[type="password"] {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 240px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .input-group input[type="password"]:focus {
+      border-color: #4CAF50;
+      outline: none;
+      box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+    }
+    
+    .input-group button {
       padding: 12px 24px;
       font-size: 16px;
       background-color: #4CAF50;
@@ -70,12 +94,12 @@
       transition: background-color 0.3s, transform 0.2s;
     }
     
-    button:hover {
+    .input-group button:hover {
       background-color: #45a049;
       transform: translateY(-2px);
     }
     
-    button:active {
+    .input-group button:active {
       transform: scale(0.98);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
@@ -84,8 +108,10 @@
 <body>
   <div id="loginBox">
     <h2>請輸入密碼以觀看即時影像</h2>
-    <input type="text" id="passwordInput" placeholder="輸入密碼" autocomplete="off" lang="zh-Hant">
-    <button onclick="checkPassword()">登入</button>
+    <div class="input-group">
+      <input type="password" id="passwordInput" placeholder="請輸入密碼" autocomplete="off" lang="zh-Hant">
+      <button onclick="checkPassword()">登入</button>
+    </div>
     <p id="errorMsg" style="color: red;"></p>
     <p id="loadingMsg" style="color: green; display: none;">登入中<span id="dotAnim"></span></p>
   </div>
@@ -228,7 +254,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.6.2
+    v3.6.3
   </div>
 </body>
 </html>
