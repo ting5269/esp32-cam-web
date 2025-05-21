@@ -21,6 +21,7 @@
       display: none;
       text-align: center;
       transition: opacity 0.5s ease;
+      position: relative;
     }
     /* 影像區塊隱藏效果（點擊圖片觸發） */
     .hiddenBox {
@@ -105,16 +106,16 @@
     }
     /* 紅點 */
     #statusIndicator {
-      position: absolute;  /* 絕對定位 */
-      top: 8px;            /* 調整距離上方 */
-      right: 8px;          /* 調整距離右方 */
+      position: absolute;
+      top: 10px;    /* 調整這裡距離 */
+      right: 10px;  /* 調整這裡距離 */
       width: 14px;
       height: 14px;
       background-color: red;
       border-radius: 50%;
-      opacity: 0;
+      opacity: 1;   /* 不要0，改用動畫控制 */
       animation: blink 1s infinite;
-      z-index: 9999;
+      z-index: 10;  /* 確保比圖片高 */
       display: none;
     }
     @keyframes blink {
@@ -291,7 +292,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.7.1
+    v3.7.2
   </div>
 </body>
 </html>
