@@ -142,7 +142,7 @@
   <!-- ✅ 紅點閃爍指示器：加入這行 -->
   <div id="statusIndicator"></div>
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbxCatojFMNgNCsp2Kz8V6yhLqk6iESlyZqrCYCFE4hGUc0YF1R1qRvc-mrhwDX1Xon_sw/exec";
+    const configUrl = "https://script.google.com/macros/s/AKfycbxoAv-Q6lCzxRAKXlG-mNUWHXIkbBfEgxxBJJKee4Hh2Wb_QvvjpkR_NsxU6_D5F1Yo6g/exec";
     let mqttTopic = "";
     //登入動畫
     let dotInterval = null;
@@ -203,7 +203,13 @@
       const loadingMsg = document.getElementById("loadingMsg");
       errorMsg.innerText = "";
       loadingMsg.style.display = "block"; // 顯示登入中
-      startDotAnimation();
+      startDotAnimation(); // 👉 開始動畫
+    
+      if (!password) {
+        errorMsg.innerText = "請輸入密碼";
+        loadingMsg.style.display = "none"; // 輸入錯誤時隱藏提示
+        return;
+      }
     
       const visitorId = getVisitorId();
       const { device, browser } = detectDeviceAndBrowser();
@@ -220,8 +226,8 @@
           fetch(url)
             .then(res => res.json())
             .then(data => {
-              loadingMsg.style.display = "none";
-              stopDotAnimation();
+              loadingMsg.style.display = "none"; // 登入完成後隱藏提示
+              stopDotAnimation(); // 👉 停止動畫
     
               if (data.success) {
                 mqttTopic = data.mqttTopic;
@@ -233,8 +239,7 @@
               }
             })
             .catch(err => {
-              loadingMsg.style.display = "none";
-              stopDotAnimation();
+              loadingMsg.style.display = "none"; // 錯誤時也要隱藏
               errorMsg.innerText = "連線錯誤，請稍後再試";
               console.error(err);
             });
@@ -287,7 +292,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.8
+    v3.7
   </div>
 </body>
 </html>
