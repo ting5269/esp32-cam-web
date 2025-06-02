@@ -198,45 +198,22 @@
     }
   
     function checkPassword() {
-      const passwordInput = document.getElementById("passwordInput");
-      const password = passwordInput.value;
+      const password = document.getElementById("passwordInput").value;
       const errorMsg = document.getElementById("errorMsg");
       const loadingMsg = document.getElementById("loadingMsg");
       errorMsg.innerText = "";
-      loadingMsg.style.display = "block";
-      startDotAnimation();
+      loadingMsg.style.display = "block"; // 顯示登入中
+      startDotAnimation(); // 👉 開始動畫
+    
+      if (!password) {
+        errorMsg.innerText = "請輸入密碼";
+        loadingMsg.style.display = "none"; // 輸入錯誤時隱藏提示
+        return;
+      }
     
       const visitorId = getVisitorId();
       const { device, browser } = detectDeviceAndBrowser();
     
-      // 自動登入白名單
-      const trustedVisitors = {
-        "4f219331-0f34-4e3b-8c83-50995b3d916a": "我的Mac",
-        "27d6d6de-7b81-4425-a626-f868d7af3257": "我的手機",
-        "bb1eade4-b85a-44c5-abb4-4c5a557bf126": "學校Mac",
-        "476a2adc-31c1-43d1-bdae-b2622515d3d2": "我的桌機",
-        "2d4ea227-00f6-4625-992d-2d34a5931ea0": "學校桌機"
-      };
-    
-      // 若是受信任的裝置，自動通過
-      if (visitorId in trustedVisitors) {
-        console.log(`自動登入成功：${trustedVisitors[visitorId]}`);
-        mqttTopic = "esp32cam/stream"; // ✅ 你可以指定一個預設主題
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("streamBox").style.display = "block";
-        stopDotAnimation();
-        startMQTT();
-        return;
-      }
-    
-      if (!password) {
-        errorMsg.innerText = "請輸入密碼";
-        loadingMsg.style.display = "none";
-        stopDotAnimation();
-        return;
-      }
-    
-      // ... 原本的 fetch 流程繼續執行
       fetch("https://ipapi.co/json/")
         .then(res => res.json())
         .then(info => {
@@ -249,8 +226,8 @@
           fetch(url)
             .then(res => res.json())
             .then(data => {
-              loadingMsg.style.display = "none";
-              stopDotAnimation();
+              loadingMsg.style.display = "none"; // 登入完成後隱藏提示
+              stopDotAnimation(); // 👉 停止動畫
     
               if (data.success) {
                 mqttTopic = data.mqttTopic;
@@ -262,14 +239,12 @@
               }
             })
             .catch(err => {
-              loadingMsg.style.display = "none";
-              stopDotAnimation();
+              loadingMsg.style.display = "none"; // 錯誤時也要隱藏
               errorMsg.innerText = "連線錯誤，請稍後再試";
               console.error(err);
             });
         });
     }
-
     function startMQTT() {
       const client = mqtt.connect("wss://broker.mqttgo.io:8084/mqtt");
     
@@ -317,7 +292,7 @@
     user-select: none;
     z-index: 9999;
   ">
-    v3.8
+    v3.7
   </div>
 </body>
 </html>
