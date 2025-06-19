@@ -126,45 +126,16 @@
   </style>
 </head>
 <body>
-  <div id="loginBox">
-    <h2>請輸入密碼以觀看即時影像</h2>
-    <div class="input-group">
-      <input type="password" id="passwordInput" placeholder="請輸入密碼" autocomplete="off" lang="zh-Hant">
-      <button onclick="checkPassword()">登入</button>
-    </div>
-    <p id="errorMsg" style="color: red;"></p>
-    <p id="loadingMsg" style="color: green; display: none;">登入中<span id="dotAnim"></span></p>
-  </div>
   <div id="streamBox">
     <h2>ESP32 即時影像</h2>
     <img id="cameraImage" src="">
   </div>
-  <!-- ✅ 紅點閃爍指示器：加入這行 -->
   <div id="statusIndicator"></div>
+  <p id="errorMsg" style="color: red; text-align: center;"></p>
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbxoAv-Q6lCzxRAKXlG-mNUWHXIkbBfEgxxBJJKee4Hh2Wb_QvvjpkR_NsxU6_D5F1Yo6g/exec";
+    const configUrl = "https://script.google.com/macros/s/AKfycbw2cujqWXa-T__X4vhIh73frKIOkVjBPo1JwB86WihCt4uCoEXOJj6oQpPeuOyuDJriXQ/exec";
     let mqttTopic = "";
-    //登入動畫
-    let dotInterval = null;
-    function startDotAnimation() {
-      const dotElement = document.getElementById("dotAnim");
-      let dots = "";
-      dotInterval = setInterval(() => {
-        dots = dots.length < 3 ? dots + "." : "";
-        dotElement.innerText = dots;
-      }, 500); // 每 0.5 秒更新一次
-    }
-    
-    function stopDotAnimation() {
-      clearInterval(dotInterval);
-      dotInterval = null;
-      document.getElementById("dotAnim").innerText = "";
-    }
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-  
+
     function getVisitorId() {
       let id = localStorage.getItem("visitorId");
       if (!id) {
@@ -173,126 +144,87 @@
       }
       return id;
     }
-  
+
     function detectDeviceAndBrowser() {
       const userAgent = navigator.userAgent;
       let device = /mobile/i.test(userAgent) ? "手機" : "電腦";
-  
+
       let browser = "未知";
       if (userAgent.includes("Chrome")) browser = "Chrome";
       else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) browser = "Safari";
       else if (userAgent.includes("Firefox")) browser = "Firefox";
       else if (userAgent.includes("Edg")) browser = "Edge";
-  
+
       return { device, browser };
     }
-  
+
     window.onload = () => {
-      const pw = getQueryParam("pw");
-      if (pw) {
-        document.getElementById("passwordInput").value = pw;
-        checkPassword();
-        // 清除網址列的 ?pw=...，不會重新載入頁面
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
-  
-    function checkPassword() {
-      const password = document.getElementById("passwordInput").value;
-      const errorMsg = document.getElementById("errorMsg");
-      const loadingMsg = document.getElementById("loadingMsg");
-      errorMsg.innerText = "";
-      loadingMsg.style.display = "block"; // 顯示登入中
-      startDotAnimation(); // 👉 開始動畫
-    
-      if (!password) {
-        errorMsg.innerText = "請輸入密碼";
-        loadingMsg.style.display = "none"; // 輸入錯誤時隱藏提示
-        return;
-      }
-    
+      autoLogin();
+    };
+
+    function autoLogin() {
       const visitorId = getVisitorId();
       const { device, browser } = detectDeviceAndBrowser();
-    
+
       fetch("https://ipapi.co/json/")
         .then(res => res.json())
         .then(info => {
           const ip = info.ip || "";
           const city = info.city || "";
           const country = info.country_name || "";
-    
-          const url = `${configUrl}?password=${encodeURIComponent(password)}&visitorId=${encodeURIComponent(visitorId)}&ip=${ip}&city=${city}&country=${country}&device=${device}&browser=${browser}`;
-    
+
+          const url = `${configUrl}?visitorId=${encodeURIComponent(visitorId)}&ip=${ip}&city=${city}&country=${country}&device=${device}&browser=${browser}`;
+
           fetch(url)
             .then(res => res.json())
             .then(data => {
-              loadingMsg.style.display = "none"; // 登入完成後隱藏提示
-              stopDotAnimation(); // 👉 停止動畫
-    
               if (data.success) {
                 mqttTopic = data.mqttTopic;
-                document.getElementById("loginBox").style.display = "none";
                 document.getElementById("streamBox").style.display = "block";
                 startMQTT();
               } else {
-                errorMsg.innerText = data.message || "驗證失敗";
+                document.getElementById("errorMsg").innerText = data.message || "驗證失敗";
               }
             })
             .catch(err => {
-              loadingMsg.style.display = "none"; // 錯誤時也要隱藏
-              errorMsg.innerText = "連線錯誤，請稍後再試";
+              document.getElementById("errorMsg").innerText = "連線錯誤，請稍後再試";
               console.error(err);
             });
         });
     }
+
     function startMQTT() {
       const client = mqtt.connect("wss://broker.mqttgo.io:8084/mqtt");
-    
+
       client.on("connect", () => {
         console.log("MQTT Connected");
         client.subscribe(mqttTopic);
       });
-    
+
       let oldUrl = null;
-    
-      // 新增這行：紀錄最後更新時間
       let lastImageTime = Date.now();
-    
-      // 加入定時器檢查是否超過5秒沒畫面
+
       setInterval(() => {
         if (Date.now() - lastImageTime > 5000) {
-          // 超過5秒沒更新，隱藏紅點
           document.getElementById("statusIndicator").style.display = "none";
         }
       }, 1000);
-    
+
       client.on("message", (topic, payload) => {
         const blob = new Blob([payload], { type: 'image/jpeg' });
         if (oldUrl) URL.revokeObjectURL(oldUrl);
         oldUrl = URL.createObjectURL(blob);
         document.getElementById("cameraImage").src = oldUrl;
-    
-        // 更新最後畫面時間，並顯示紅點
         lastImageTime = Date.now();
         document.getElementById("statusIndicator").style.display = "block";
       });
-    
-      // 將點擊事件綁定到外層 container，不受 MQTT 更新干擾
+
       document.getElementById("cameraImage").addEventListener("click", function () {
         document.getElementById("streamBox").classList.toggle("hiddenBox");
       });
     }
   </script>
-  <div style="
-    position: fixed;
-    right: 8px;
-    bottom: 8px;
-    font-size: 16px;
-    color: #888;
-    user-select: none;
-    z-index: 9999;
-  ">
-    v3.7
-  </div>
+  <div style="position: fixed; right: 8px; bottom: 8px; font-size: 16px; color: #888;">v4.0</div>
 </body>
+
 </html>
