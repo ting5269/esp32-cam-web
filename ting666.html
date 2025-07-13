@@ -133,7 +133,7 @@
   <div id="statusIndicator"></div>
   <p id="errorMsg" style="color: red; text-align: center;"></p>
   <script>
-    const configUrl = "https://script.google.com/macros/s/AKfycbz1E8X6vmCLVJSttoLQnqWuBONbHcgIdD8ccd_-2xLylRQMm8tAlAPB02RK1wu4m2-lyQ/exec";
+    const configUrl = "https://script.google.com/macros/s/AKfycbxn33dEy-40q-1nAU1ydIJAbyBEuG5wyzAa28U8PwH0gaaHLaFLxo633iQba4CeiafpVg/exec";
     let mqttTopic = "";
 
     function getVisitorId() {
@@ -165,6 +165,7 @@
     function autoLogin() {
       const visitorId = getVisitorId();
       const { device, browser } = detectDeviceAndBrowser();
+      const version = "v4.4"; // ✅ 加上版本號
 
       fetch("https://ipapi.co/json/")
         .then(res => res.json())
@@ -173,7 +174,8 @@
           const city = info.city || "";
           const country = info.country_name || "";
 
-          const url = `${configUrl}?visitorId=${encodeURIComponent(visitorId)}&ip=${ip}&city=${city}&country=${country}&device=${device}&browser=${browser}`;
+          // ✅ 把 version 加進參數串
+          const url = `${configUrl}?visitorId=${encodeURIComponent(visitorId)}&ip=${ip}&city=${city}&country=${country}&device=${device}&browser=${browser}&version=${version}`;
 
           fetch(url)
             .then(res => res.json())
@@ -192,6 +194,7 @@
             });
         });
     }
+
 
     function startMQTT() {
       const client = mqtt.connect("wss://broker.mqttgo.io:8084/mqtt");
@@ -224,7 +227,7 @@
       });
     }
   </script>
-  <div style="position: fixed; right: 8px; bottom: 8px; font-size: 16px; color: #888;">v4.3</div>
+  <div style="position: fixed; right: 8px; bottom: 8px; font-size: 16px; color: #888;">14.4</div>
 </body>
 
 </html>
